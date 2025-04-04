@@ -1,3 +1,6 @@
+from perlin import *
+
+
 #CONSTANTS
 SIZE = 8
 
@@ -35,5 +38,22 @@ def populateWorld():
 			world.append(newChunk)
 	return world
 
-def populateChunks():
-	pass
+def populateChunks(world):
+	#this is really disgusting im so sorry
+	for chunk in world:
+		noisemap = genNoisemap(chunk.pos[0], chunk.pos[1])
+		x = 0
+		y = 0
+		for i in len(noisemap):
+			newTile = tile((x, y), noisemap[i], chunk, (y == 0), (y == 7), (x == 0), (x == 7))
+			if x + 1 == 8:
+				#8 = chunk size
+				y += 1
+				x = 0
+			else:
+				x += 1
+
+
+
+
+

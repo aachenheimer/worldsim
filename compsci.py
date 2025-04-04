@@ -10,6 +10,8 @@ world = []
 
 world = populateWorld()
 
+populateChunks(world)
+
 
 
 
