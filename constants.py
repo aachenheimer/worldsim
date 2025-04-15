@@ -119,20 +119,12 @@ def findViewedTiles(viewedChunks, subtile, world):
 	#yea this is completely busted LMAO
 	#then in a seperate function you display them
 	#lowkey this might just be a brute force and do this for every single individual viewed chunk
-	viewedTiles = []
-	for chunkPos in viewedChunks:
-		chunk = world[(chunkPos[1]*SIZE) + chunkPos[0]]
-		for i in range(subtile[1] * 8, 63):
-			if subtile[0] == 0: viewedTiles.append(chunk.data[i].symbol)
-			elif i % subtile[0] < subtile[0]: continue
-			else: viewedTiles.append(chunk.data[i].symbol)
-	print(viewedTiles)
-	print(len(viewedTiles))
-	return viewedTiles
-
-
-
-
-
-
+	viewedTiles = [[]*9]
+	
+	#chunk one / top left corner
+	worldval = (viewedChunks[0][1]*SIZE) + viewedChunks[0][0]
+	chunkdata = world[worldval].data
+	for i in range(63-(subtile[1]*8), 64):
+		pass
+	#i think im genuinely gonna have to rewrite this entire fucking program whyd i do it like this im a bumbling fucking retard christ
 
