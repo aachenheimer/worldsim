@@ -13,12 +13,12 @@ from math import *
 from time import *
 
 #CONSTANTS
-SIZE = 32
+SIZE = 128
 
 CAMERA_VERTICAL = 12
 CAMERA_HORIZONTAL = 18
 
-CLOCKSPEED = 0.75
+CLOCKSPEED = 0.01
 
 #COLOR CONSTANTS
 BACKGROUND = [0,0,0]
@@ -60,31 +60,41 @@ class tile:
             #affects above
             t = world[(self.pos[1]*SIZE)+self.pos[0]-SIZE]
             val = self.data
-            t.data += val*0.001
             #deteriorates
-            if val < -0.2:
+            if self.symbol == "w":
                 #water
+                t.data += val*0.001
+                
                 t.color[2] -= val
                 self.symbol = "w"
-            elif val >= -0.2 and val < 0:
+            elif self.symbol == "s":
                 #sand
+                t.data += val*0.001
+                
                 t.color[0] -= val
                 t.color[1] -= val
                 self.symbol = "s"
             #additive
-            elif val >= 0 and val < 0.7:
+            elif self.symbol == "x":
                 #grass
-                t.color[0] -= val * 2
+                if t.symbol == "x" or t.symbol == "m": t.data -= val*0.00001
+                else: t.data += val*0.001
+                
+                t.color[0] -= val
+                t.color[1] += val*0.5
                 t.color[2] -= val
                 self.symbol = "x"
             else:
                 #rock
-                if t.color[0] > 100: t.color[0] -= val
-                else: t.color += val
-                if t.color[1] > 100: t.color[1] -= val
-                else: t.color[1] += val
-                if t.color[2] > 100: t.color[1] -= val
-                else: t.color[2] += val
+                if t.symbol == "m": t.data += val*0.00001
+                else: t.data -= val*0.0001
+                
+                if t.color[0] > 128: t.color[0] -= val*.00025
+                else: t.color[0] += val*.00025
+                if t.color[1] > 128: t.color[1] -= val*.05
+                else: t.color[1] += val*.05
+                if t.color[2] > 128: t.color[2] -= val*.00025
+                else: t.color[2] += val*.00025
                 self.symbol = "m"
             if t.color[0] > 255: t.color[0] = 255
             elif t.color[0] < 0: t.color[0] = 0
