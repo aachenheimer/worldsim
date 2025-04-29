@@ -1,0 +1,9 @@
+{
+	"size":256,
+	"camera_horizontal":64,
+	"camera_vertical":42,
+	"camera_speed_horizontal":2,
+	"camera_speed_vertical":2,
+	"clockspeed":2,
+	"performance_mode":true
+}

@@ -12,13 +12,37 @@ from math import *
 
 from time import *
 
+import json
+#makes it easier to read
+
+import os
+
 #CONSTANTS
-SIZE = 128
+SIZE = 256
 
-CAMERA_VERTICAL = 12
-CAMERA_HORIZONTAL = 18
+CAMERA_VERTICAL = 42
+CAMERA_HORIZONTAL = 64
 
-CLOCKSPEED = 0.01
+CAMERA_SPEED_VERTICAL = 2
+CAMERA_SPEED_HORIZONTAL = 2
+
+CLOCKSPEED = 1
+
+PERFORMANCE_MODE = True
+
+if os.path.exists("settings.json"):
+    f = open("settings.json", "r")
+    settings = json.load(f)
+    f.close()
+    
+    SIZE = settings["size"]
+    CAMERA_VERTICAL = settings["camera_vertical"]
+    CAMERA_HORIZONTAL = settings["camera_horizontal"]
+    CAMERA_SPEED_VERTICAL = settings["camera_speed_vertical"]
+    CAMERA_SPEED_HORIZONTAL = settings["camera_speed_horizontal"]
+    CLOCKSPEED = settings["clockspeed"]
+    PERFORMANCE_MODE = settings["performance_mode"]
+    
 
 #COLOR CONSTANTS
 BACKGROUND = [0,0,0]
@@ -34,13 +58,14 @@ camera = [0, 0]
 clock = time()
 
 #PYNOISE WORK
-perlin = Perlin(octaves=randint(1,5), persistence=random())
+perlin = Perlin(octaves=randint(3,10), persistence=random(), frequency = randint(1,3))
 noisemap = noise_map_plane(width=SIZE, height=SIZE, lower_x=1, upper_x=randint(5,12), lower_z=1, upper_z=randint(5,12), source=perlin)
 
 #PYGAME WORK
 font.init()
 display.init()
-SCREEN = display.set_mode((720, 360))
+#SCREEN = display.set_mode((720, 360))
+SCREEN = display.set_mode()
 FONT = font.Font(font.match_font("consolas"), 48)
 display.update()
 
@@ -63,7 +88,7 @@ class tile:
             #deteriorates
             if self.symbol == "w":
                 #water
-                t.data += val*0.001
+                t.data += val*0.01
                 
                 t.color[2] -= val
                 self.symbol = "w"
@@ -73,15 +98,16 @@ class tile:
                 
                 t.color[0] -= val
                 t.color[1] -= val
+                t.color[2] += val
                 self.symbol = "s"
             #additive
             elif self.symbol == "x":
                 #grass
-                if t.symbol == "x" or t.symbol == "m": t.data -= val*0.00001
-                else: t.data += val*0.001
+                if t.symbol == "x" or t.symbol == "m": t.data -= val*0.01
+                else: t.data += val
                 
                 t.color[0] -= val
-                t.color[1] += val*0.5
+                t.color[1] += val*2
                 t.color[2] -= val
                 self.symbol = "x"
             else:
@@ -89,12 +115,12 @@ class tile:
                 if t.symbol == "m": t.data += val*0.00001
                 else: t.data -= val*0.0001
                 
-                if t.color[0] > 128: t.color[0] -= val*.00025
-                else: t.color[0] += val*.00025
-                if t.color[1] > 128: t.color[1] -= val*.05
-                else: t.color[1] += val*.05
-                if t.color[2] > 128: t.color[2] -= val*.00025
-                else: t.color[2] += val*.00025
+                if t.color[0] > 128: t.color[0] -= val*.025
+                else: t.color[0] += val*.025
+                if t.color[1] > 128: t.color[1] -= val*.5
+                else: t.color[1] += val*.5
+                if t.color[2] > 128: t.color[2] -= val*.025
+                else: t.color[2] += val*.025
                 self.symbol = "m"
             if t.color[0] > 255: t.color[0] = 255
             elif t.color[0] < 0: t.color[0] = 0
@@ -295,23 +321,23 @@ drawTiles(world, viewedTiles, CAMERA_HORIZONTAL, CAMERA_VERTICAL, FONT)
 print("ready!")
 while True:
     for events in event.get([KEYUP]):
-        if events.key == K_UP and camera[1] - 1 >= 0:
-            camera[1] -= 1
+        if events.key == K_UP and camera[1] - CAMERA_SPEED_VERTICAL >= 0:
+            camera[1] -= CAMERA_SPEED_VERTICAL
             viewedTiles = findViewedTiles(world, camera, CAMERA_HORIZONTAL, CAMERA_VERTICAL, SIZE)
             #printViewedTiles(world, viewedTiles, CAMERA_HORIZONTAL, CAMERA_VERTICAL)
             drawTiles(world, viewedTiles, CAMERA_HORIZONTAL, CAMERA_VERTICAL, FONT)
-        if events.key == K_DOWN and camera[1] + 1 + CAMERA_VERTICAL < SIZE:
-            camera[1] += 1
+        if events.key == K_DOWN and camera[1] + (CAMERA_SPEED_VERTICAL * CAMERA_VERTICAL) < SIZE:
+            camera[1] += CAMERA_SPEED_VERTICAL
             viewedTiles = findViewedTiles(world, camera, CAMERA_HORIZONTAL, CAMERA_VERTICAL, SIZE)
             #printViewedTiles(world, viewedTiles, CAMERA_HORIZONTAL, CAMERA_VERTICAL)
             drawTiles(world, viewedTiles, CAMERA_HORIZONTAL, CAMERA_VERTICAL, FONT)
-        if events.key == K_RIGHT and camera[0] + 1 + CAMERA_HORIZONTAL < SIZE:
-            camera[0] += 1
+        if events.key == K_RIGHT and camera[0] + (CAMERA_SPEED_HORIZONTAL * CAMERA_HORIZONTAL) < SIZE:
+            camera[0] += CAMERA_SPEED_HORIZONTAL
             viewedTiles = findViewedTiles(world, camera, CAMERA_HORIZONTAL, CAMERA_VERTICAL, SIZE)
             #printViewedTiles(world, viewedTiles, CAMERA_HORIZONTAL, CAMERA_VERTICAL)
             drawTiles(world, viewedTiles, CAMERA_HORIZONTAL, CAMERA_VERTICAL, FONT)
-        if events.key == K_LEFT and camera[0] - 1 >= 0:
-            camera[0] -= 1
+        if events.key == K_LEFT and camera[0] - CAMERA_SPEED_HORIZONTAL >= 0:
+            camera[0] -= CAMERA_SPEED_HORIZONTAL
             viewedTiles = findViewedTiles(world, camera, CAMERA_HORIZONTAL, CAMERA_VERTICAL, SIZE)
             #printViewedTiles(world, viewedTiles, CAMERA_HORIZONTAL, CAMERA_VERTICAL)
             drawTiles(world, viewedTiles, CAMERA_HORIZONTAL, CAMERA_VERTICAL, FONT)
@@ -320,6 +346,12 @@ while True:
     event.pump()
     if time() - clock > CLOCKSPEED:
         clock = time()
-        for tile in world:
-            tile.influence()
-        drawTiles(world, viewedTiles, CAMERA_HORIZONTAL, CAMERA_VERTICAL, FONT)
+        if PERFORMANCE_MODE == False:
+            #updates every tile
+            for tile in world:
+                tile.influence()
+            drawTiles(world, viewedTiles, CAMERA_HORIZONTAL, CAMERA_VERTICAL, FONT)
+        elif PERFORMANCE_MODE == True:
+            for tile in viewedTiles:
+                world[tile].influence()
+            drawTiles(world, viewedTiles, CAMERA_HORIZONTAL, CAMERA_VERTICAL, FONT)
