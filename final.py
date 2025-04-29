@@ -30,6 +30,8 @@ CLOCKSPEED = 1
 
 PERFORMANCE_MODE = True
 
+MODE = 1
+
 if os.path.exists("settings.json"):
     f = open("settings.json", "r")
     settings = json.load(f)
@@ -42,6 +44,7 @@ if os.path.exists("settings.json"):
     CAMERA_SPEED_HORIZONTAL = settings["camera_speed_horizontal"]
     CLOCKSPEED = settings["clockspeed"]
     PERFORMANCE_MODE = settings["performance_mode"]
+    MODE = settings["mode"]
     
 
 #COLOR CONSTANTS
@@ -58,7 +61,7 @@ camera = [0, 0]
 clock = time()
 
 #PYNOISE WORK
-perlin = Perlin(octaves=randint(3,10), persistence=random(), frequency = randint(1,3))
+perlin = Perlin(octaves=randint(3,10), persistence=random(), frequency = randint(1,MODE))
 noisemap = noise_map_plane(width=SIZE, height=SIZE, lower_x=1, upper_x=randint(5,12), lower_z=1, upper_z=randint(5,12), source=perlin)
 
 #PYGAME WORK
